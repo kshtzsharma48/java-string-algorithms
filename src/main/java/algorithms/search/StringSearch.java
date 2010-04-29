@@ -5,5 +5,7 @@ package algorithms.search;
  */
 public interface StringSearch {
 
-	int indexOf(CharSequence haystack, CharSequence needle);
+	StringFinder compileFinder(CharSequence sought);
+
+	int indexOf(CharSequence sought, CharSequence string);
 }
