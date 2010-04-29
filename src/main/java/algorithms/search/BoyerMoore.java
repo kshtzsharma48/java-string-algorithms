@@ -13,6 +13,9 @@ import com.google.common.collect.Maps;
  */
 class BoyerMoore implements StringFinder {
 
+	// TODO : TurboBoyerMoore
+	// TODO : BoyerMooreHorspool
+
 	private static Map<Character, Integer> computeBadTable(final CharSequence sought) {
 		final int lastIndex = sought.length() - 1;
 		final Map<Character, Integer> table = Maps.newHashMapWithExpectedSize(sought.length());
