@@ -2,6 +2,7 @@ package algorithms.search;
 
 import java.util.Map;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 
 /**
@@ -28,7 +29,8 @@ class BoyerMoore implements StringFinder {
 		return table;
 	}
 
-	private static int[] computePrefix(CharSequence string) {
+	@VisibleForTesting
+	static int[] computePrefixOld(CharSequence string) {
 		int size = string.length();
 		int[] result = new int[size];
 		result[0] = 0;
@@ -44,7 +46,26 @@ class BoyerMoore implements StringFinder {
 		return result;
 	}
 
-	private static int[] prepareGoodSuffixHeuristic(CharSequence sought) {
+	@VisibleForTesting
+	static int[] computePrefix(CharSequence string) {
+		int q, k;
+		int[] result = new int[string.length()];
+		result[0] = 0;
+		k = 0;
+		for (q = 1; q < string.length(); q++) {
+			while (k > 0 && string.charAt(k) != string.charAt(q)) {
+				k = result[k - 1];
+			}
+			if (string.charAt(k) == string.charAt(q)) {
+				k++;
+			}
+
+			result[q] = k;
+		}
+		return result;
+	}
+
+	static int[] prepareGoodSuffixHeuristic(CharSequence sought) {
 		int size = sought.length();
 		int[] result = new int[size + 1];
 		CharSequence reversed = Help.reverse(sought);
@@ -64,11 +85,13 @@ class BoyerMoore implements StringFinder {
 	}
 
 	private final CharSequence sought;
+	private final int soughtLength;
 	private final Map<Character, Integer> badCharacterShifts;
 	private final int[] goodSuffixShifts;
 
 	BoyerMoore(CharSequence sought) {
 		this.sought = sought;
+		this.soughtLength = sought.length();
 		this.badCharacterShifts = computeBadTable(sought);
 		this.goodSuffixShifts = prepareGoodSuffixHeuristic(sought);
 	}
@@ -79,30 +102,39 @@ class BoyerMoore implements StringFinder {
 		assert string.length() != 0 : "Simple length heuristic should have been tested already.";
 		assert sought.length() != 0 : "Simple length heuristic should have been tested already.";
 
-		int needle_len = sought.length();
-		int haystack_len = string.length();
+		int stringLength = string.length();
+		int lengthDifference = stringLength - soughtLength;
 
-		int s = 0;
-		while (s <= (haystack_len - needle_len)) {
-			int j = needle_len;
-			while (j > 0 && sought.charAt(j - 1) == string.charAt(s + j - 1)) {
-				j--;
+		for (int index = 0, lastMatchIndex = soughtLength;
+			  index <= lengthDifference; ) {
+
+			// go from right to left until no chars to test (match found) or mismatch found
+			for (lastMatchIndex = soughtLength;
+				  lastMatchIndex > 0
+							 && sought.charAt(lastMatchIndex - 1) == string.charAt(index + lastMatchIndex - 1);
+				  lastMatchIndex--) {
+				// continue
 			}
 
-			if (j > 0) {
-				Integer shift = badCharacterShifts.get(string.charAt(s + j - 1));
-				int k = (shift == null) ? needle_len : shift;
-				int m;
-				if (k < j && (m = (j - k - 1)) > goodSuffixShifts[j]) {
-					s += m;
+			if (lastMatchIndex > 0) {
+				int shift = getShift(string.charAt(index + lastMatchIndex - 1));
+				int m = (lastMatchIndex - shift - 1);
+				if (shift < lastMatchIndex && m > goodSuffixShifts[lastMatchIndex]) {
+					index += m;
 				} else {
-					s += goodSuffixShifts[j];
+					index += goodSuffixShifts[lastMatchIndex];
 				}
 			} else {
-				return s;
+				return index;
 			}
 		}
 
 		return -1;
+	}
+
+	private int getShift(Character character) {
+		Integer shiftObjectValue = badCharacterShifts.get(character);
+		int shift = (shiftObjectValue == null) ? soughtLength : shiftObjectValue;
+		return shift;
 	}
 }
