@@ -12,15 +12,19 @@ public class TestHelp {
         void consume(T value);
     }
 
-    public static <T> long timeMultipleCalls(Callable<T> callable, int n, Callback<T> callback) throws Exception {
+    public static <T> void timeAndLogMultipleCalls(String description, Callable<T> callable, int n, Callback<T> callback, TimeUnit unit) throws Exception {
+        logTiming(description, n, timeMultipleCalls(callable, n, callback, unit), unit);
+    }
+
+    public static <T> long timeMultipleCalls(Callable<T> callable, int n, Callback<T> callback, TimeUnit unit) throws Exception {
         long before = System.nanoTime();
         for (int i = 0; i < n; i++) {
             callback.consume(callable.call());
         }
-        return System.nanoTime() - before;
+        return unit.convert(System.nanoTime() - before, TimeUnit.NANOSECONDS);
     }
 
-    public static void logTiming(String description, long timeNanos) {
-        System.out.format("%s = %,dms%n", description, TimeUnit.NANOSECONDS.toMillis(timeNanos));
+    public static void logTiming(String description, int n, long time, TimeUnit unit) {
+        System.out.format("%s = %,d %s (n = %,d)%n", description, time, unit.name().toLowerCase(), n);
     }
 }

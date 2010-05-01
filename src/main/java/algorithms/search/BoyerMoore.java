@@ -16,29 +16,44 @@
 package algorithms.search;
 
 import com.google.common.collect.AbstractIterator;
-import static com.google.common.collect.Iterators.size;
-import static java.lang.Math.max;
-import static java.util.Arrays.fill;
 
 import java.util.Iterator;
 
+import static java.lang.Math.max;
+import static java.util.Arrays.fill;
+
 /**
+ * A unicode-safe implementation of Boyer-Moore.
+ * <p/>
  * This is an adaptation of Doyle Myers' original source, located at
  * http://www.aelvin.com/bmi.html. I've modified it so this object
- * tracks much less state. TODO : see how to property attribute work
+ * tracks less state, and provides an Iterator. Released under Apache
+ * License v2 with Doyle's permission.
  * <p/>
  * It's important for the user to realize the memory and performance implications when
  * choosing this specific algorithm. This algorithm creates an integer table for 64k
  * unicode characters in memory, which means that for short queries or short search text
  * a brute-force approach or another algorithm may be preferred.
  */
-public class BoyerMoore implements StringFinder {
+class BoyerMoore extends AbstractStringFinder {
 
-    private static final int ALPHABET_SIZE = 0x10000; // UNICODE alphabet size (64K chars)
+    public enum Alphabet {
+        Unicode(0x10000),
+        Ascii(0x7f);
 
-    private static int[] preComputeBadCharTable(CharSequence sought) {
+        private final int size;
+        Alphabet(int size) {
+            this.size = size;
+        }
+
+        int getSize() {
+            return size;
+        }
+    }
+
+    private static int[] preComputeBadCharTable(CharSequence sought, Alphabet alphabet) {
         int length = sought.length();
-        int[] skip = new int[ALPHABET_SIZE];
+        int[] skip = new int[alphabet.getSize()];
         fill(skip, length);
         for (int j = 0; j < length - 1; j++) {
             skip[sought.charAt(j)] = length - j - 1;
@@ -82,31 +97,39 @@ public class BoyerMoore implements StringFinder {
     private final int soughtLength;
 
     public BoyerMoore(final CharSequence sought) {
+        this(sought, Alphabet.Ascii);
+    }
+
+    public BoyerMoore(final CharSequence sought, final Alphabet alphabet) {
         this.sought = sought;
         soughtLength = sought.length();
-        badCharTable = preComputeBadCharTable(sought);
+        badCharTable = preComputeBadCharTable(sought, alphabet);
         goodCharTable = preComputeGoodCharTable(sought);
     }
 
     @Override
-    public int indexIn(CharSequence string) {
-        return indexIn(string, 0);
-    }
-
-    @Override
     public int indexIn(CharSequence string, int startIndex) {
-        Iterator<Integer> indexes = matches(string, startIndex);
-        return indexes.hasNext() ? indexes.next() : -1;
-    }
+        int textLength = string.length();
+        int lengthDiff = textLength - soughtLength;
+        int i = startIndex;
 
-    @Override
-    public boolean isPresentIn(CharSequence string) {
-        return matches(string, 0).hasNext();
-    }
+        while (i <= lengthDiff) {
+            int j;
+            for (j = soughtLength - 1; j >= 0 && sought.charAt(j) == string.charAt(i + j); j--) {
+                // decrement j while matches
+            }
 
-    @Override
-    public int countOccurencesIn(CharSequence string) {
-        return size(matches(string, 0));
+            if (j < 0) {
+                return i;
+            } else {
+                i += max(
+                        goodCharTable[j + 1], // suffix
+                        badCharTable[string.charAt(i + j)] - soughtLength + j + 1 // bad char
+                );
+            }
+        }
+
+        return -1;
     }
 
     @Override
@@ -117,28 +140,14 @@ public class BoyerMoore implements StringFinder {
 
             @Override
             protected Integer computeNext() {
-                int textLength = text.length();
-                int lengthDiff = textLength - soughtLength;
+                int result = BoyerMoore.this.indexIn(text, i);
 
-                while (i <= lengthDiff) {
-                    int j;
-                    for (j = soughtLength - 1; j >= 0 && sought.charAt(j) == text.charAt(i + j); j--) {
-                        // decrement j while matches
-                    }
-
-                    if (j < 0) {
-                        int found = i;
-                        i += goodCharTable[0];
-                        return found;
-                    } else {
-                        i += max(
-                                goodCharTable[j + 1], // suffix
-                                badCharTable[text.charAt(i + j)] - soughtLength + j + 1 // bad char
-                        );
-                    }
+                if (result == -1) {
+                    return endOfData();
+                } else {
+                    i = result + goodCharTable[0];
+                    return result;
                 }
-
-                return endOfData();
             }
         };
     }

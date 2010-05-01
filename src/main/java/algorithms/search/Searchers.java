@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Searchers {
 
-	private abstract static class AbstractSearcher implements StringSearch {
+    private abstract static class AbstractSearcher implements StringSearch {
 		@Override
 		public final int indexOf(final CharSequence sought, final CharSequence string) {
 			checkNotNull(sought);
@@ -55,7 +55,24 @@ public class Searchers {
 		}
 	}
 
+    private static class KnuthMorrisPrattSearcher extends AbstractSearcher {
+
+        @Override
+        protected int doIndexOf(CharSequence sought, CharSequence string) {
+            return compileFinder(sought).indexIn(string);
+        }
+
+        @Override
+        public StringFinder compileFinder(CharSequence sought) {
+            return new KnuthMorrisPratt(sought);
+        }
+    }
+
 	static StringSearch newBoyerMooreStringSearcher() {
 		return new BoyerMooreSearcher();
 	}
+
+    static StringSearch newKnuthMorrisPrattStringSearcher() {
+        return new KnuthMorrisPrattSearcher();
+    }
 }
