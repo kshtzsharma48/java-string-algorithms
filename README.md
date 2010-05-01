@@ -14,8 +14,5 @@ A collection of various string-related algorithm implementations in Java.
 
 ### Ideas
 
-* Annotations to document behaviors
-** Exact char match vs. equivalence (handling accents)
-** Case sensitivity
-** etc
+* Annotations to document behaviors (Exact char match vs. equivalence (handling accents), Case sensitivity, etc)
 
