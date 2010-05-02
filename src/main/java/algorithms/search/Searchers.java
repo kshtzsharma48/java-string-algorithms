@@ -24,22 +24,27 @@ public class Searchers {
 
     private abstract static class AbstractSearcher implements StringSearch {
 		@Override
-		public final int indexOf(final CharSequence sought, final CharSequence string) {
-			checkNotNull(sought);
+		public final int indexOf(final CharSequence substring, final CharSequence string) {
+			checkNotNull(substring);
 			checkNotNull(string);
 
-			if (string.length() < sought.length()) {
+			if (string.length() < substring.length()) {
 				return -1;
-			} else if (sought.length() == 0) {
+			} else if (substring.length() == 0) {
 				return 0;
 			} else if (string.length() == 0) {
 				return -1;
 			}
 
-			return doIndexOf(sought, string);
+			return doIndexOf(substring, string);
 		}
 
-		protected abstract int doIndexOf(CharSequence sought, CharSequence string);
+        @Override
+        public final boolean contains(CharSequence substring, CharSequence string) {
+            return indexOf(substring, string) != -1;
+        }
+
+        protected abstract int doIndexOf(CharSequence sought, CharSequence string);
 	}
 
 	private static class BoyerMooreSearcher extends AbstractSearcher {

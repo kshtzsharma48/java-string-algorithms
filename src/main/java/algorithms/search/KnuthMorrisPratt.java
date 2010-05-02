@@ -47,20 +47,19 @@ class KnuthMorrisPratt extends AbstractStringFinder {
     public int indexIn(CharSequence string, int startIndex) {
         int m = startIndex;
         int i = 0;
+        int l = string.length();
+        int maxM = l - sought.length();
 
-        while (m + i < string.length()) {
-            if (sought.charAt(i) == string.charAt(m + i)) {
+        for (int j = m + i; m <= maxM && j < l; j = m + i) {
+            if (sought.charAt(i) == string.charAt(j)) {
                 i += 1;
                 if (i == sought.length()) {
                     return m;
                 }
             } else {
-                m += i - table[i];
-                if (table[i] > -1) {
-                    i = table[i];
-                } else {
-                    i = 0;
-                }
+                int shift = table[i];
+                m += i - shift;
+                i = (shift > -1) ? shift : 0;
             }
         }
 

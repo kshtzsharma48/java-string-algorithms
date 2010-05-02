@@ -22,5 +22,7 @@ public interface StringSearch {
 
 	StringFinder compileFinder(CharSequence sought);
 
-	int indexOf(CharSequence sought, CharSequence string);
+	int indexOf(CharSequence substring, CharSequence string);
+
+    boolean contains(CharSequence substring, CharSequence string);
 }

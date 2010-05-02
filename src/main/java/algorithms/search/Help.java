@@ -44,8 +44,13 @@ class Help {
 
 			@Override
 			public CharSequence subSequence(final int start, final int end) {
-				throw new UnsupportedOperationException();
-			}
-		};
+                return new StringBuilder(string.subSequence(start, end)).reverse();
+            }
+
+            @Override
+            public String toString() {
+                return subSequence(0, length()).toString();
+            }
+        };
 	}
 }
