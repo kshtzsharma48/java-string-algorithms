@@ -7,7 +7,7 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 
-public class LongestPalindrome {
+class LongestPalindrome {
 
     public CharSequence findLongestPalindrome(final CharSequence string) {
         checkNotNull(string);

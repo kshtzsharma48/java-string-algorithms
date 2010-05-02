@@ -6,6 +6,7 @@ A collection of various string-related algorithm implementations in Java.
 
 * Boyer-Moore
 * Knuth-Morris-Pratt
+* Longest Palindrome
 
 ### Coming Soon
 

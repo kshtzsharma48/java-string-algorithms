@@ -73,11 +73,11 @@ public class Searchers {
         }
     }
 
-	static StringSearch newBoyerMooreStringSearcher() {
+	public static StringSearch newBoyerMooreStringSearcher() {
 		return new BoyerMooreSearcher();
 	}
 
-    static StringSearch newKnuthMorrisPrattStringSearcher() {
+    public static StringSearch newKnuthMorrisPrattStringSearcher() {
         return new KnuthMorrisPrattSearcher();
     }
 }
