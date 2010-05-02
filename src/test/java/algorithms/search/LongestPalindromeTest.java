@@ -69,10 +69,24 @@ public class LongestPalindromeTest {
     }
 
     @Test
+    public void considersWhitespace() {
+        String str = "satan oscillate my metallic sonatas";
+        assertEquals("ata", palindrome.findLongestPalindrome(str).toString());
+    }
+
+    @Test
     public void somms() {
         String str = "satan oscillate my metallic sonatas";
         str = WHITESPACE.removeFrom(str);
         assertEquals(str, palindrome.findLongestPalindrome(str).toString());
+    }
+
+    @Test
+    public void somms2() {
+        String somms = "satan oscillate my metallic sonatas";
+        String str = "My favorite album is " + somms + "! Not really but for this test, yeah.";
+        str = WHITESPACE.removeFrom(str);
+        assertEquals(WHITESPACE.removeFrom(somms), palindrome.findLongestPalindrome(str).toString());
     }
 
     @Test(expected = NullPointerException.class)
@@ -82,7 +96,7 @@ public class LongestPalindromeTest {
 
     @Test
     public void emptyString() {
-        assertEquals("", palindrome.findLongestPalindrome("").toString());
+        assertNull(palindrome.findLongestPalindrome(""));
     }
 
     @Test
@@ -104,5 +118,15 @@ public class LongestPalindromeTest {
     @Test
     public void endsWithEvenLengthPalindrome() {
         assertEquals("baab", palindrome.findLongestPalindrome(reverse("baabcdefghijklmnop")).toString());
+    }
+
+    @Test
+    public void itIsCaseSensitive() {
+        assertEquals("oo", palindrome.findLongestPalindrome("Foof").toString());
+    }
+
+    @Test
+    public void nullWhenNoPalindromes() {
+        assertNull(palindrome.findLongestPalindrome("abcdefg hijklmnop qr stuv wx yz!?"));
     }
 }

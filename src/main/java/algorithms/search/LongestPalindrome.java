@@ -1,16 +1,8 @@
 package algorithms.search;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Lists;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -20,20 +12,43 @@ public class LongestPalindrome {
     public CharSequence findLongestPalindrome(final CharSequence string) {
         checkNotNull(string);
 
-        int l = 0; // longest one so far
-        int i = -1; // index of longest one
+        int longest = 0; // longest one so far
+        int indexOfLongest = -1; // index of longest one
         for (Integer index : indices(string)) {
-            if ((l / 2) > Math.min(string.length() - index, index)) {
+            if (longest / 2 > Math.min(string.length() - index, index)) {
                 break;
             }
-            int length = longestPalindromeCenteredOnIndexInString(index, string, l + 1);
-            if (length > l) {
-                i = index;
-                l = length;
+
+            boolean even = true;
+            boolean odd = true;
+
+            for (Integer length : lengthsToTry(index, string)) {
+                even = even && isEvenLengthPalindrome(string, index, length);
+                odd = odd && isOddLengthPalindrome(string, index, length);
+                if (!even && !odd) {
+                    break;
+                }
+                
+                int l = -1;
+                if (even) {
+                    l = 2 * length;
+                }
+                if (odd) {
+                    l = 2 * length + 1;
+                }
+                if (l > longest) {
+                    indexOfLongest = index;
+                    longest = l;
+                }
             }
         }
-        final int length = l;
-        final int index = i;
+
+        if (longest <= 1) {
+            return null;
+        }
+        
+        final int length = longest;
+        final int index = indexOfLongest;
         return new CharSequence() {
             @Override
             public int length() {
@@ -49,7 +64,7 @@ public class LongestPalindrome {
 
             @Override
             public CharSequence subSequence(int start, int end) {
-                throw new UnsupportedOperationException();
+                return toString().subSequence(start, end);
             }
 
             @Override
@@ -63,52 +78,16 @@ public class LongestPalindrome {
         };
     }
 
-    private int longestPalindromeCenteredOnIndexInString(final Integer index, final CharSequence string, int minLength) {
-        if ((minLength / 2) > index) {
-            return -1;
-        }
-        if ((minLength / 2) > (string.length() - index)) {
-            return -1;
-        }
+    private boolean isEvenLengthPalindrome(CharSequence string, Integer index, Integer length) {
+        return (string.charAt(index - length) == string.charAt(index + length - 1));
+    }
 
-        final AtomicInteger l = new AtomicInteger();
-        SortedSet<Integer> lengths = new TreeSet<Integer>();
-        Supplier<Integer> evenSupplier = new Supplier<Integer>() {
-            boolean enabled = true;
-            @Override
-            public Integer get() {
-                enabled = enabled && (string.charAt(index - l.get()) == string.charAt(index + l.get() - 1));
-                return enabled
-                        ? 2 * l.get()
-                        : -1;
-            }
-        };
-        Supplier<Integer> oddSupplier = new Supplier<Integer>() {
-            boolean enabled = true;
-            @Override
-            public Integer get() {
-                enabled = enabled && (string.charAt(index - l.get()) == string.charAt(index + l.get()));
-                return enabled
-                        ? 2 * l.get() + 1
-                        : -1;
-            }
-        };
-
-        for (Integer length : lengthsToTry(index, string)) {
-            l.set(length);
-            int e = evenSupplier.get();
-            int o = oddSupplier.get();
-            if (e == o && e == -1) {
-                break;
-            }
-            lengths.add(e);
-            lengths.add(o);
-        }
-
-        return lengths.isEmpty() ? -1 : lengths.last();
+    private boolean isOddLengthPalindrome(CharSequence string, Integer index, Integer length) {
+        return (string.charAt(index - length) == string.charAt(index + length));
     }
 
     private Iterable<Integer> lengthsToTry(final int index, final CharSequence string) {
+        final int stringLength = string.length();
         return new Iterable<Integer>() {
             @Override
             public Iterator<Integer> iterator() {
@@ -128,31 +107,16 @@ public class LongestPalindrome {
                     }
 
                     private boolean wouldExtendPastEnd(int i) {
-                        if (i % 2 == 0) {
-                            // even
-                            return index - 1 + i >= string.length();
-                        } else {
-                            // odd
-                            return index + i >= string.length();
-                        }
+                        int extent = index + i - 1 + (i % 2);
+                        return extent >= stringLength;
                     }
 
                     private boolean wouldExtendPastBeginning(int i) {
-                        return index - i < 0;
+                        return i > index;
                     }
                 };
             }
         };
-    }
-
-    private boolean isWithinBounds(int distanceFromOddCenter, Integer index, CharSequence string) {
-        boolean result = (index - distanceFromOddCenter) >= 0
-                && (index + distanceFromOddCenter) < string.length();
-        if (result) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     Iterable<Integer> indices(final CharSequence string) {
