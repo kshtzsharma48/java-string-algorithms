@@ -44,7 +44,7 @@ class Help {
 
 			@Override
 			public CharSequence subSequence(final int start, final int end) {
-                return new StringBuilder(string.subSequence(start, end)).reverse();
+                return new StringBuilder(this).subSequence(start, end);
             }
 
             @Override

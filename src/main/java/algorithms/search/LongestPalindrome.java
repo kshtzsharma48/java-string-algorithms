@@ -1,10 +1,9 @@
 package algorithms.search;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.AbstractIterator;
 
 import java.util.Iterator;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 
 class LongestPalindrome {
@@ -46,47 +45,21 @@ class LongestPalindrome {
         if (longest <= 1) {
             return null;
         }
-        
-        final int length = longest;
-        final int index = indexOfLongest;
-        return new CharSequence() {
-            @Override
-            public int length() {
-                return length;
-            }
 
-            @Override
-            public char charAt(int i) {
-                int start = index - (length / 2);
-                i += start;
-                return string.charAt(i);
-            }
-
-            @Override
-            public CharSequence subSequence(int start, int end) {
-                return toString().subSequence(start, end);
-            }
-
-            @Override
-            public String toString() {
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < length(); i++) {
-                    builder.append(charAt(i));
-                }
-                return builder.toString();
-            }
-        };
+        int start = indexOfLongest - (longest / 2);
+        int end = start + longest;
+        return string.subSequence(start, end);
     }
 
-    private boolean isEvenLengthPalindrome(CharSequence string, Integer index, Integer length) {
+    private static boolean isEvenLengthPalindrome(CharSequence string, Integer index, Integer length) {
         return (string.charAt(index - length) == string.charAt(index + length - 1));
     }
 
-    private boolean isOddLengthPalindrome(CharSequence string, Integer index, Integer length) {
+    private static boolean isOddLengthPalindrome(CharSequence string, Integer index, Integer length) {
         return (string.charAt(index - length) == string.charAt(index + length));
     }
 
-    private Iterable<Integer> lengthsToTry(final int index, final CharSequence string) {
+    private static Iterable<Integer> lengthsToTry(final int index, final CharSequence string) {
         final int stringLength = string.length();
         return new Iterable<Integer>() {
             @Override
@@ -119,7 +92,7 @@ class LongestPalindrome {
         };
     }
 
-    Iterable<Integer> indices(final CharSequence string) {
+    private static Iterable<Integer> indices(final CharSequence string) {
         return new Iterable<Integer>() {
             @Override
             public Iterator<Integer> iterator() {
