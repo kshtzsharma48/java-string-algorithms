@@ -1,6 +1,13 @@
+String Algorithms in Java
+=========================
+
 ### About
 
 A collection of various string-related algorithm implementations in Java.
+
+#### Requirements
+
+* Java 6
 
 ### Implemented
 

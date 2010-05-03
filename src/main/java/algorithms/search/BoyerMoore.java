@@ -15,12 +15,12 @@
  */
 package algorithms.search;
 
+import static com.google.common.base.Preconditions.checkElementIndex;
 import com.google.common.collect.AbstractIterator;
-
-import java.util.Iterator;
-
 import static java.lang.Math.max;
 import static java.util.Arrays.fill;
+
+import java.util.Iterator;
 
 /**
  * A unicode-safe implementation of Boyer-Moore.
@@ -37,7 +37,7 @@ import static java.util.Arrays.fill;
  */
 class BoyerMoore extends AbstractStringFinder {
 
-    public enum Alphabet {
+    enum Alphabet {
         Unicode(0x10000),
         Ascii(0x7f);
 
@@ -46,15 +46,16 @@ class BoyerMoore extends AbstractStringFinder {
             this.size = size;
         }
 
-        int getSize() {
-            return size;
+        int[] newTable(int length) {
+            int[] table = new int[size];
+            fill(table, length);
+            return table;
         }
     }
 
     private static int[] preComputeBadCharTable(CharSequence sought, Alphabet alphabet) {
         int length = sought.length();
-        int[] skip = new int[alphabet.getSize()];
-        fill(skip, length);
+        int[] skip = alphabet.newTable(length);
         for (int j = 0; j < length - 1; j++) {
             skip[sought.charAt(j)] = length - j - 1;
         }
@@ -110,6 +111,9 @@ class BoyerMoore extends AbstractStringFinder {
     @Override
     public int indexIn(CharSequence string, int startIndex) {
         int textLength = string.length();
+
+        checkElementIndex(startIndex, textLength);
+
         int lengthDiff = textLength - soughtLength;
         int i = startIndex;
 
@@ -134,6 +138,8 @@ class BoyerMoore extends AbstractStringFinder {
 
     @Override
     public Iterator<Integer> matches(final CharSequence text, final int startIndex) {
+        checkElementIndex(startIndex, text.length());
+
         return new AbstractIterator<Integer>() {
 
             private int i = max(0, startIndex);

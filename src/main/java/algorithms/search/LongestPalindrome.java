@@ -1,5 +1,6 @@
 package algorithms.search;
 
+import com.google.common.annotations.VisibleForTesting;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.AbstractIterator;
 
@@ -92,7 +93,8 @@ class LongestPalindrome {
         };
     }
 
-    private static Iterable<Integer> indices(final CharSequence string) {
+    @VisibleForTesting
+    static Iterable<Integer> indices(final CharSequence string) {
         return new Iterable<Integer>() {
             @Override
             public Iterator<Integer> iterator() {
