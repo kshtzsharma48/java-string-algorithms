@@ -20,10 +20,20 @@ public abstract class StringSearchTestBase {
         return searchApi;
     }
 
+    protected CharSequence loadBeowulfText() throws IOException {
+        File beowulf = new File(getClass().getClassLoader().getResource("anonymous-beowulf-543.txt").getFile());
+		return Files.toString(beowulf, Charsets.ISO_8859_1);
+    }
+
 	@Before
 	public void setup() {
 		searchApi = createNewSearchApi();
 	}
+
+    @Test
+    public void findEmptyString() {
+        assertEquals(0, searchApi.indexOf("", "a"));
+    }
 
 	@Test
 	public void findBanana() {
@@ -54,14 +64,23 @@ public abstract class StringSearchTestBase {
 	}
 
 	@Test
-	public void findPassageInBeowulf() throws IOException {
-		File beowulf = new File(getClass().getClassLoader().getResource("anonymous-beowulf-543.txt").getFile());
-		String beowulfText = Files.toString(beowulf, Charsets.ISO_8859_1);
+	public void findPassageInBeowulf1() throws IOException {
+		CharSequence beowulfText = loadBeowulfText();
 		final StringFinder beowulfFinder = searchApi.compileFinder("Beowulf");
         assertEquals(84, beowulfFinder.countOccurencesIn(beowulfText));
+	}
+
+	@Test
+	public void findPassageInBeowulf2() throws IOException {
+		CharSequence beowulfText = loadBeowulfText();
         final StringFinder internetWiretapFinder = searchApi.compileFinder("Internet Wiretap");
         assertEquals(4, internetWiretapFinder.indexIn(beowulfText));
         assertEquals(2, internetWiretapFinder.countOccurencesIn(beowulfText));
+	}
+
+	@Test
+	public void findPassageInBeowulf3() throws IOException {
+		CharSequence beowulfText = loadBeowulfText();
         final StringFinder stringFinder = searchApi.compileFinder("Beowulf finally accepted Hygd's offer of kingdom and hoard");
         assertEquals(146983, stringFinder.indexIn(beowulfText));
     }

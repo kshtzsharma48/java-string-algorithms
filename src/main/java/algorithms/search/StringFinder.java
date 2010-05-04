@@ -26,9 +26,7 @@ public interface StringFinder {
 
     int indexIn(CharSequence string, int startIndex);
 
-    boolean isPresentIn(CharSequence string);
-
     int countOccurencesIn(CharSequence string);
 
-    Iterator<Integer> matches(CharSequence text, int startIndex);
+    Iterator<Integer> allMatches(CharSequence text, int startIndex);
 }

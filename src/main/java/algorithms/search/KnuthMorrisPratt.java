@@ -1,7 +1,5 @@
 package algorithms.search;
 
-import java.util.Arrays;
-
 /**
  * Implementation of the Knuth-Morris-Pratt algorithm for finding substrings
  * in a larger string.

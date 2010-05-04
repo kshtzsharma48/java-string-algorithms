@@ -15,6 +15,8 @@
  */
 package algorithms.search;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -36,23 +38,11 @@ public class Searchers {
 				return -1;
 			}
 
-			return doIndexOf(substring, string);
+			return compileFinder(substring).indexIn(string);
 		}
-
-        @Override
-        public final boolean contains(CharSequence substring, CharSequence string) {
-            return indexOf(substring, string) != -1;
-        }
-
-        protected abstract int doIndexOf(CharSequence sought, CharSequence string);
 	}
 
 	private static class BoyerMooreSearcher extends AbstractSearcher {
-
-		@Override
-		public int doIndexOf(final CharSequence sought, final CharSequence string) {
-			return compileFinder(sought).indexIn(string);
-		}
 
 		@Override
 		public StringFinder compileFinder(final CharSequence sought) {
@@ -63,14 +53,24 @@ public class Searchers {
     private static class KnuthMorrisPrattSearcher extends AbstractSearcher {
 
         @Override
-        protected int doIndexOf(CharSequence sought, CharSequence string) {
-            return compileFinder(sought).indexIn(string);
-        }
-
-        @Override
         public StringFinder compileFinder(CharSequence sought) {
             return new KnuthMorrisPratt(sought);
         }
+    }
+    public static StringSearch newNaiveSearcher() {
+        class NaiveSearcher extends AbstractSearcher {
+            @Override
+            public StringFinder compileFinder(final CharSequence sought) {
+                class Naive extends AbstractStringFinder {
+                    @Override
+                    public int indexIn(CharSequence string, int startIndex) {
+                        return sought.toString().indexOf(string.toString(), startIndex);
+                    }
+                }
+                return new Naive();
+            }
+        }
+        return new NaiveSearcher();
     }
 
 	public static StringSearch newBoyerMooreStringSearcher() {
@@ -79,5 +79,29 @@ public class Searchers {
 
     public static StringSearch newKnuthMorrisPrattStringSearcher() {
         return new KnuthMorrisPrattSearcher();
+    }
+
+    public static StringSearch newUkkonenSuffixTreeStringSearcher() {
+        return new AbstractSearcher() {
+            @Override
+            public StringFinder compileFinder(final CharSequence sought) {
+                class Ukkonen extends AbstractStringFinder {
+                    @Override
+                    public int indexIn(CharSequence string, int startIndex) {
+                        return suffixTreeFor(string.subSequence(startIndex, string.length())).indexOf(sought);
+                    }
+
+                    @Override
+                    public Iterator<Integer> allMatches(CharSequence text, int startIndex) {
+                        throw new UnsupportedOperationException("Too costly on large strings!");
+                    }
+                }
+                return new Ukkonen();
+            }
+
+            private UkkonenSuffixTree suffixTreeFor(CharSequence string) {
+                return UkkonenSuffixTree.forString(string);
+            }
+        };
     }
 }

@@ -18,17 +18,12 @@ public abstract class AbstractStringFinder implements StringFinder {
     }
 
     @Override
-    public boolean isPresentIn(CharSequence string) {
-        return indexIn(string) != -1;
-    }
-
-    @Override
     public int countOccurencesIn(CharSequence string) {
-        return Iterators.size(matches(string, 0));
+        return Iterators.size(allMatches(string, 0));
     }
 
     @Override
-    public Iterator<Integer> matches(final CharSequence text, final int startIndex) {
+    public Iterator<Integer> allMatches(final CharSequence text, final int startIndex) {
         return new AbstractIterator<Integer>() {
 
             private int i = max(0, startIndex);
@@ -40,10 +35,14 @@ public abstract class AbstractStringFinder implements StringFinder {
                 if (result == -1) {
                     return endOfData();
                 } else {
-                    i = result + 1;
+                    i = result + charsToAdvanceOnMatch();
                     return result;
                 }
             }
         };
+    }
+
+    protected int charsToAdvanceOnMatch() {
+        return 1;
     }
 }

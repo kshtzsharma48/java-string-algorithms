@@ -120,7 +120,7 @@ class BoyerMoore extends AbstractStringFinder {
         while (i <= lengthDiff) {
             int j;
             for (j = soughtLength - 1; j >= 0 && sought.charAt(j) == string.charAt(i + j); j--) {
-                // decrement j while matches
+                // decrement j while allMatches
             }
 
             if (j < 0) {
@@ -137,24 +137,7 @@ class BoyerMoore extends AbstractStringFinder {
     }
 
     @Override
-    public Iterator<Integer> matches(final CharSequence text, final int startIndex) {
-        checkElementIndex(startIndex, text.length());
-
-        return new AbstractIterator<Integer>() {
-
-            private int i = max(0, startIndex);
-
-            @Override
-            protected Integer computeNext() {
-                int result = BoyerMoore.this.indexIn(text, i);
-
-                if (result == -1) {
-                    return endOfData();
-                } else {
-                    i = result + goodCharTable[0];
-                    return result;
-                }
-            }
-        };
+    protected int charsToAdvanceOnMatch() {
+        return goodCharTable[0];
     }
 }
