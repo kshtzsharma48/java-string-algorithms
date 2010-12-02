@@ -224,6 +224,7 @@ public class UkkonenSuffixTree {
     }
 
     private static class Node {
+
         private UkkonenSuffixTree suffixTree;
 
         private Node suffixNode;
@@ -239,8 +240,9 @@ public class UkkonenSuffixTree {
             this.suffixNode = null;
         }
 
-        private char charAt(int index) {
-            return suffixTree.getText().charAt(index);
+        private Character charAt(int index) {
+            //noinspection UnnecessaryBoxing
+            return Character.valueOf(suffixTree.getText().charAt(index));
         }
 
         private void addEdge(int charIndex, Edge edge) {
@@ -252,7 +254,8 @@ public class UkkonenSuffixTree {
         }
 
         private Edge findEdge(char ch) {
-            return edges.get(ch);
+            //noinspection UnnecessaryBoxing
+            return edges.get(Character.valueOf(ch));
         }
 
         private Node getSuffixNode() {
