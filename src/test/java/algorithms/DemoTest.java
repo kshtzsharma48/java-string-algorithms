@@ -34,16 +34,18 @@ public class DemoTest {
     public void ukkonnenSuffixTreeSearchTest() throws IOException {
         File beowulf = new File(getClass().getClassLoader().getResource("anonymous-beowulf-543.txt").getFile());
         String beowulfText = Files.toString(beowulf, Charsets.ISO_8859_1);
-        long before = System.currentTimeMillis();
-        UkkonenSuffixTree tree = UkkonenSuffixTree.forString(beowulfText);
-        System.out.format("Build suffix tree in %dms%n", System.currentTimeMillis() - before);
-        for (int i = 0; i < 100; i++) {
-            before = System.currentTimeMillis();
-            int steveIndex = tree.indexOf("steve");
-            int kihaIndex = tree.indexOf("kiha");
-            int nygIndex = tree.indexOf("new york giants");
-            int beowulfIndex = tree.indexOf("beowulf");
-            System.out.format("s = %d, k = %d, n = %d, b = %d in %dms%n", steveIndex, kihaIndex, nygIndex, beowulfIndex, System.currentTimeMillis() - before);
+        for (int j = 0; j < 100; j++) {
+            long before = System.currentTimeMillis();
+            UkkonenSuffixTree tree = UkkonenSuffixTree.forString(beowulfText);
+            System.out.format("Build suffix tree in %dms%n", System.currentTimeMillis() - before);
+            for (int i = 0; i < 1; i++) {
+                before = System.currentTimeMillis();
+                int steveIndex = tree.indexOf("steve");
+                int kihaIndex = tree.indexOf("kiha");
+                int nygIndex = tree.indexOf("new york giants");
+                int beowulfIndex = tree.indexOf("kingdom and hoard");
+                System.out.format("s = %d, k = %d, n = %d, b = %d in %dms%n", steveIndex, kihaIndex, nygIndex, beowulfIndex, System.currentTimeMillis() - before);
+            }
         }
     }
 

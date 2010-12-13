@@ -228,7 +228,7 @@ public class UkkonenSuffixTree {
         private UkkonenSuffixTree suffixTree;
 
         private Node suffixNode;
-        private final Map<Character, Edge> edges = Maps.newHashMap();
+        private final Map<Character, Edge> edges = Maps.newTreeMap();
 
         private Node(Node node, Node suffixNode) {
             this.suffixTree = node.suffixTree;
