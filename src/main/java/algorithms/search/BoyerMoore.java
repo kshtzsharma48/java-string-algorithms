@@ -16,11 +16,8 @@
 package algorithms.search;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
-import com.google.common.collect.AbstractIterator;
 import static java.lang.Math.max;
 import static java.util.Arrays.fill;
-
-import java.util.Iterator;
 
 /**
  * A unicode-safe implementation of Boyer-Moore.
@@ -37,107 +34,108 @@ import java.util.Iterator;
  */
 class BoyerMoore extends AbstractStringFinder {
 
-    enum Alphabet {
-        Unicode(0x10000),
-        Ascii(0x7f);
+  enum Alphabet {
+    Unicode(0x10000),
+    Ascii(0x7f);
 
-        private final int size;
-        Alphabet(int size) {
-            this.size = size;
+    private final int size;
+
+    Alphabet(int size) {
+      this.size = size;
+    }
+
+    int[] newTable(int length) {
+      int[] table = new int[size];
+      fill(table, length);
+      return table;
+    }
+  }
+
+  private static int[] preComputeBadCharTable(CharSequence sought, Alphabet alphabet) {
+    int length = sought.length();
+    int[] skip = alphabet.newTable(length);
+    for (int j = 0; j < length - 1; j++) {
+      skip[sought.charAt(j)] = length - j - 1;
+    }
+    return skip;
+  }
+
+  private static int[] preComputeGoodCharTable(CharSequence sought) {
+    int length = sought.length();
+    int[] result = new int[length + 1];
+    int[] f = new int[length + 1];
+    int j = length + 1;
+
+    f[length] = j;
+
+    for (int i = length; i > 0; i--) {
+      while (j <= length && sought.charAt(i - 1) != sought.charAt(j - 1)) {
+        if (result[j] == 0) {
+          result[j] = j - i;
         }
-
-        int[] newTable(int length) {
-            int[] table = new int[size];
-            fill(table, length);
-            return table;
-        }
+        j = f[j];
+      }
+      f[i - 1] = --j;
     }
 
-    private static int[] preComputeBadCharTable(CharSequence sought, Alphabet alphabet) {
-        int length = sought.length();
-        int[] skip = alphabet.newTable(length);
-        for (int j = 0; j < length - 1; j++) {
-            skip[sought.charAt(j)] = length - j - 1;
-        }
-        return skip;
+    int p = f[0];
+    for (j = 0; j <= length; ++j) {
+      if (result[j] == 0) {
+        result[j] = p;
+      }
+      if (j == p) {
+        p = f[p];
+      }
+    }
+    return result;
+  }
+
+  private final int[] badCharTable;
+  private final int[] goodCharTable;
+  private final CharSequence sought;
+  private final int soughtLength;
+
+  public BoyerMoore(final CharSequence sought) {
+    this(sought, Alphabet.Ascii);
+  }
+
+  public BoyerMoore(final CharSequence sought, final Alphabet alphabet) {
+    this.sought = sought;
+    soughtLength = sought.length();
+    badCharTable = preComputeBadCharTable(sought, alphabet);
+    goodCharTable = preComputeGoodCharTable(sought);
+  }
+
+  @Override
+  public int indexIn(CharSequence string, int startIndex) {
+    int textLength = string.length();
+
+    checkElementIndex(startIndex, textLength);
+
+    int lengthDiff = textLength - soughtLength;
+    int i = startIndex;
+
+    while (i <= lengthDiff) {
+      int j;
+      for (j = soughtLength - 1; j >= 0 && sought.charAt(j) == string.charAt(i + j); j--) {
+        // decrement j while allMatches
+      }
+
+      if (j < 0) {
+        return i;
+      } else {
+        i += max(
+          goodCharTable[j + 1], // suffix
+          badCharTable[string.charAt(i + j)] - soughtLength + j + 1 // bad char
+        );
+      }
     }
 
-    private static int[] preComputeGoodCharTable(CharSequence sought) {
-        int length = sought.length();
-        int[] result = new int[length + 1];
-        int[] f = new int[length + 1];
-        int j = length + 1;
+    return -1;
+  }
 
-        f[length] = j;
-
-        for (int i = length; i > 0; i--) {
-            while (j <= length && sought.charAt(i - 1) != sought.charAt(j - 1)) {
-                if (result[j] == 0) {
-                    result[j] = j - i;
-                }
-                j = f[j];
-            }
-            f[i - 1] = --j;
-        }
-
-        int p = f[0];
-        for (j = 0; j <= length; ++j) {
-            if (result[j] == 0) {
-                result[j] = p;
-            }
-            if (j == p) {
-                p = f[p];
-            }
-        }
-        return result;
-    }
-
-    private final int[] badCharTable;
-    private final int[] goodCharTable;
-    private final CharSequence sought;
-    private final int soughtLength;
-
-    public BoyerMoore(final CharSequence sought) {
-        this(sought, Alphabet.Ascii);
-    }
-
-    public BoyerMoore(final CharSequence sought, final Alphabet alphabet) {
-        this.sought = sought;
-        soughtLength = sought.length();
-        badCharTable = preComputeBadCharTable(sought, alphabet);
-        goodCharTable = preComputeGoodCharTable(sought);
-    }
-
-    @Override
-    public int indexIn(CharSequence string, int startIndex) {
-        int textLength = string.length();
-
-        checkElementIndex(startIndex, textLength);
-
-        int lengthDiff = textLength - soughtLength;
-        int i = startIndex;
-
-        while (i <= lengthDiff) {
-            int j;
-            for (j = soughtLength - 1; j >= 0 && sought.charAt(j) == string.charAt(i + j); j--) {
-                // decrement j while allMatches
-            }
-
-            if (j < 0) {
-                return i;
-            } else {
-                i += max(
-                        goodCharTable[j + 1], // suffix
-                        badCharTable[string.charAt(i + j)] - soughtLength + j + 1 // bad char
-                );
-            }
-        }
-
-        return -1;
-    }
-
-    @Override
-    protected int charsToAdvanceOnMatch() {
-        return goodCharTable[0];
-    }
+  @Override
+  protected int charsToAdvanceOnMatch() {
+    return goodCharTable[0];
+  }
 }

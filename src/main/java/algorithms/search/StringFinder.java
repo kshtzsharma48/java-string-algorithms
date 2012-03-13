@@ -22,11 +22,11 @@ import java.util.Iterator;
  */
 public interface StringFinder {
 
-	int indexIn(CharSequence string);
+  int indexIn(CharSequence string);
 
-    int indexIn(CharSequence string, int startIndex);
+  int indexIn(CharSequence string, int startIndex);
 
-    int countOccurencesIn(CharSequence string);
+  int countOccurencesIn(CharSequence string);
 
-    Iterator<Integer> allMatches(CharSequence text, int startIndex);
+  Iterator<Integer> allMatches(CharSequence text, int startIndex);
 }

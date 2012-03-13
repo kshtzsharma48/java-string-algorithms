@@ -20,7 +20,7 @@ package algorithms.search;
  */
 public interface StringSearch {
 
-	StringFinder compileFinder(CharSequence sought);
+  StringFinder compileFinder(CharSequence sought);
 
-	int indexOf(CharSequence substring, CharSequence string);
+  int indexOf(CharSequence substring, CharSequence string);
 }
